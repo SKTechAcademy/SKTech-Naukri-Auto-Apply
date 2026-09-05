@@ -18,8 +18,11 @@ cd worker
 npm install
 npx playwright install chromium
 cp .env.example .env
+cp ../data/candidate.example.json ../data/candidate.json
 npm start
 ```
+
+Update your private `data/candidate.json` before starting. This file and the persistent browser login profile are excluded from Git.
 
 The first run opens a browser. Log in manually when requested. Update selectors in `src/selectors.js` if Naukri's UI differs.
 
