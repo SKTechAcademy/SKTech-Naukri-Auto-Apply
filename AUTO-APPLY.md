@@ -16,7 +16,7 @@ Double-click START-AUTO-APPLY.cmd and open http://127.0.0.1:8788. Keep the termi
 6. Open login and sign into that candidate's own Naukri session. Passwords, OTP and CAPTCHA are entered manually.
 7. Click Verify account. The visible Naukri profile email must exactly match the saved account email.
 8. Use **Auto Apply profile matches** for profile-filtered jobs. Use **Apply open search** to process the jobs already open in this candidate’s Naukri search, without extra score or experience filters. Both use the real saved candidate details. Preview never clicks Apply; live mode can submit one-click applications.
-9. Preview and live apply start from page 1 and follow Naukri's Next control until the result set ends. The matching-job limit controls how many eligible jobs are previewed or attempted; skipped and nonmatching jobs do not consume it.
+9. Preview and live apply start from page 1 and follow Naukri's Next control until the result set ends. The matching-job limit controls how many eligible jobs are previewed or attempted; jobs rejected by profile, freshness, or history do not consume it.
 10. Review Applications for this candidate's results. Unknown questions and unsupported pre-submit flows are recorded and skipped; an uncertain submission, CAPTCHA, or account verification failure stops the run.
 
 ## Candidate separation
