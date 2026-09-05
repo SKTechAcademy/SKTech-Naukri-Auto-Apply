@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SK Tech candidate workspace for isolated Naukri job applications."><title>SK Tech · Candidate Workspace</title><link rel="stylesheet" href="/portal.css"><script src="/portal.js" defer></script></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="SK Tech workspace"><span class="brand-mark">SK<span>↗</span></span><span>SK Tech<small>CAREER WORKSPACE</small></span></a>
+  <div class="workspace-label"><span class="small-icon">▦</span> Candidate workspace <span class="nav-dot"></span></div>
+  <div class="list-heading"><span>CANDIDATES</span><span id="candidateCount" class="count">0</span></div>
+  <label class="search"><span aria-hidden="true">⌕</span><input id="candidateSearch" type="search" aria-label="Search candidates" placeholder="Find a candidate"></label>
+  <div id="candidateList" class="candidate-list" aria-label="Candidates"></div>
+  <button id="addCandidate" class="add-candidate">＋ Add candidate</button>
+  <div class="sidebar-note"><span class="shield">◇</span><strong>A separate space for everyone</strong><p>Profiles, resumes, sessions and history stay with their candidate.</p></div>
+  <div class="sidebar-footer"><span class="mini-logo">SK</span><span>SK Tech<small>Placement operations</small></span><span class="online-dot"></span></div>
+</aside>
+<main>
+  <header class="topbar"><div><span class="muted">Workspace</span><span class="slash">/</span><span>Candidates</span></div><span id="connection" class="connection"><i></i> Local workspace</span></header>
+  <div class="page-body">
+    <div class="page-heading"><div><div class="eyebrow">PEOPLE FIRST. OPPORTUNITIES NEXT.</div><h1>Candidate workspace<span class="accent-dot">.</span></h1><p>Different skills. Individual accounts. One place to manage applications.</p></div><span class="private-label">◇ Private on this PC</span></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <div id="activeRun" class="active-run" hidden><span class="pulse"></span><span id="activeRunText"></span></div>
+    <div id="emptyState" class="empty-state" hidden><div class="empty-art">＋</div><h2>Your next placement starts here</h2><p>Add a candidate to build their profile and connect their own Naukri account.</p><button id="addFirst" class="button primary">Add your first candidate ↗</button></div>
+    <div id="candidateWorkspace" hidden>
+      <section class="candidate-hero"><div class="hero-identity"><div id="candidateAvatar" class="avatar hero-avatar">SK</div><div><div class="eyebrow">SELECTED CANDIDATE</div><h2 id="candidateName">Candidate</h2><div id="candidateSummary" class="candidate-summary"></div></div></div><div class="hero-status"><span id="profileBadge" class="badge neutral">Draft profile</span><span id="savedAt" class="saved-at"></span></div></section>
+      <div class="metrics"><div class="metric"><span>Jobs recorded</span><strong id="metricTotal">0</strong><small>This candidate’s history</small></div><div class="metric"><span>Preview matches</span><strong id="metricMatches">0</strong><small>Ready to explore</small></div><div class="metric"><span>Applied</span><strong id="metricApplied">0</strong><small>Confirmed by Naukri</small></div><div class="metric"><span>Needs attention</span><strong id="metricReview">0</strong><small>Review before continuing</small></div></div>
+      <div class="tabbar" role="tablist" aria-label="Candidate views"><button id="profileTab" role="tab" aria-selected="true" aria-controls="profilePanel">Candidate profile</button><button id="applicationsTab" role="tab" aria-selected="false" aria-controls="applicationsPanel">Applications <span id="historyCount">0</span></button><span id="unsaved" hidden>Unsaved changes</span></div>
+      <div class="workspace-grid">
+        <div>
+          <section id="profilePanel" class="card" role="tabpanel" aria-labelledby="profileTab">
+            <div class="card-heading"><div><span class="section-number">01</span><h3>Build the right profile</h3></div><p>These details are used only for the selected candidate.</p></div>
+            <form id="profileForm" autocomplete="off"><fieldset id="profileFields">
+              <div class="form-section-title">Personal details</div><div class="form-grid">
+                <label>Full name <span>*</span><input id="name" required maxlength="100" placeholder="Candidate’s full name"></label>
+                <label>Naukri account email <span>*</span><input id="naukriEmail" type="email" required placeholder="Email registered on Naukri"><small>Must match the account in this candidate’s session.</small></label>
+                <label>Contact email<input id="email" type="email" placeholder="Email for application answers"></label>
+                <label>Phone number<input id="phone" type="tel" placeholder="Candidate’s contact number"></label>
+              </div>
+              <div class="form-section-title separated">Job preferences</div><div class="form-grid">
+                <label class="wide">Target roles <span>*</span><input id="roles" required placeholder="Java Developer, Backend Developer"><small>Separate multiple roles with commas. Any technology is supported.</small></label>
+                <label class="wide">Technical skills <span>*</span><textarea id="skills" required rows="2" placeholder="Java, Spring Boot, SQL, AWS"></textarea></label>
+                <label>Preferred locations <span>*</span><input id="locations" required placeholder="Bangalore, Hyderabad, Remote"></label>
+                <label>Experience in years <span>*</span><input id="experienceYears" type="number" min="0" max="60" step="0.1" required placeholder="4.6"></label>
+                <label>Default years for listed skills <span>*</span><input id="skillExperienceYears" type="number" min="0" max="60" step="0.1" required placeholder="4.6"><small>Used for “how many years” questions when every named technology appears in Technical skills. Add exceptions under screening answers.</small></label>
+                <label>Freshness (days) <span>*</span><select id="freshnessDays" required><option value="1">Last 1 day</option><option value="2">Last 2 days</option><option value="3">Last 3 days</option><option value="7">Last 7 days</option><option value="15">Last 15 days</option></select><small>Both apply modes skip older jobs and jobs without a readable posting date.</small></label>
+                <label>Minimum match (%) <span>*</span><input id="minimumMatch" type="number" min="1" max="100" required><small>Role and location must match. Any advertised experience range is accepted.</small></label>
+                <label>Notice period<input id="noticePeriod" placeholder="Immediate / 30 days"></label>
+                <label>Current CTC<input id="currentCTC" placeholder="Include the unit, e.g. 12 LPA"></label>
+                <label>Expected CTC<input id="expectedCTC" placeholder="Include the unit, e.g. 18 LPA"></label>
+              </div>
+              <div class="form-section-title separated">Resume & screening</div>
+              <label>Resume path on this PC<input id="resumeSource" placeholder="C:\Resumes\candidate-resume.pdf"><small>A separate copy is stored for this candidate when you save.</small></label><div id="resumeStatus" class="resume-status"></div>
+              <details class="answer-details"><summary>Additional screening answers <span>Optional</span></summary><p>Use known answers only. Questions the worker cannot answer pause for review.</p><label>Answers in JSON format<textarea id="answers" class="code-input" rows="5" spellcheck="false" placeholder='{"currentLocation":"Hyderabad","custom":{"years of Java experience":"3"}}'></textarea></label></details>
+              <label class="review-check"><input id="profileConfirmed" type="checkbox"><span>I have reviewed this candidate’s details and confirmed that the resume belongs to them.</span></label>
+              <div class="form-footer"><button id="saveProfile" class="button primary" type="submit">Save candidate profile <span>↗</span></button><button id="discard" class="button quiet" type="button" hidden>Discard changes</button></div>
+            </fieldset></form>
+          </section>
+          <section id="applicationsPanel" class="card applications" role="tabpanel" aria-labelledby="applicationsTab" hidden><div class="card-heading"><div><span class="section-number">02</span><h3>Application history</h3></div><p>Results belong to this candidate only.</p></div><div class="history-toolbar"><label>Show<select id="historyFilter"><option value="all">All results</option><option value="applied">Applied</option><option value="preview">Preview matches</option><option value="review">Needs attention</option><option value="skipped">Skipped</option></select></label><button id="refreshHistory" class="button secondary">Refresh</button></div><div id="historyEmpty" class="history-empty"><span>↗</span><h3>A fresh start</h3><p>Run a preview to see matching opportunities here.</p></div><div class="table-scroll"><table id="historyTable"><thead><tr><th>Opportunity</th><th>Match</th><th>Status</th></tr></thead><tbody id="historyRows"></tbody></table></div></section>
+        </div>
+        <aside class="run-column">
+          <section class="run-card"><div class="run-title"><span class="run-symbol">↗</span><div><h3>Ready for the next step?</h3><p>Run for the selected candidate</p></div></div><div class="run-candidate"><span id="runAvatar" class="avatar small">SK</span><div><strong id="runCandidateName"></strong><small id="runEmail"></small></div></div>
+            <div class="session-box"><div class="session-heading"><span>NAUKRI SESSION</span><span id="sessionBadge" class="badge neutral">Not verified</span></div><p id="sessionDescription">Open this candidate’s separate browser and sign in.</p><div class="session-buttons"><button id="login" class="button secondary">Open login ↗</button><button id="verify" class="button secondary">Verify account</button></div></div>
+            <label class="limit-label">Jobs to check per run<input id="maxJobs" type="number" min="1" max="100" value="20"></label>
+            <label class="limit-label">Pages to scan in preview<input id="pages" type="number" min="1" max="10" value="10"><small>Preview starts at page 1 even when another search page is open. Live apply remains capped at two pages.</small></label>
+            <button id="preview" class="button preview-button">Preview matching jobs <span>→</span></button><button id="apply" class="button primary apply-button">Auto Apply profile matches <span>↗</span></button>
+            <button id="applySearch" class="button preview-button">Apply open search <span>↗</span></button><p class="search-help">Applies jobs from this candidate’s open Naukri search, up to your limit, without extra score or experience filters. Your saved freshness limit applies. Answers still use their real details.</p>
+            <button id="stop" class="button stop-button" hidden>Stop this run</button>
+            <p id="runMessage" class="run-message" aria-live="polite">Save the profile, then verify the Naukri account.</p>
+          </section>
+          <div class="protection-card"><div class="eyebrow">CANDIDATE SEPARATION</div><h3>Details stay in their lane.</h3><ul><li>Individual login session</li><li>Candidate-owned resume copy</li><li>Account check before applying</li><li>Profile locked during a run</li></ul><p>Unknown questions or an unreadable account stop the run for review.</p></div>
+        </aside>
+      </div>
+    </div>
+    <footer class="page-footer"><span>SK Tech <span class="footer-dot">·</span> Candidate Workspace</span><span>Built around your candidates.</span></footer>
+  </div>
+</main>
+<dialog id="newCandidateDialog"><form id="newCandidateForm"><div class="dialog-icon">＋</div><h2>A new candidate.<br>A separate workspace.</h2><p>Start with their name. Their details and Naukri login will stay separate from everyone else.</p><label>Candidate name<input id="newCandidateName" required maxlength="100" placeholder="Enter full name" autocomplete="off"></label><div class="dialog-actions"><button id="cancelNew" class="button secondary" type="button">Cancel</button><button class="button primary" type="submit">Create candidate ↗</button></div></form></dialog>
+</body></html>

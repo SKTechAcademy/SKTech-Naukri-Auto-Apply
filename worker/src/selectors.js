@@ -6,6 +6,6 @@ export const selectors = {
   jobDescription: '.job-desc, .job-description',
   location: '.locWdth, .location',
   experience: '.expwdth, .experience',
-  applyButton: 'button:has-text("Apply"), a:has-text("Apply"), button:has-text("Apply Now")',
+  applyButton: 'button:text-is("Apply"):visible, a:text-is("Apply"):visible, button:text-is("Apply Now"):visible',
   alreadyApplied: 'text=/already applied/i'
 };

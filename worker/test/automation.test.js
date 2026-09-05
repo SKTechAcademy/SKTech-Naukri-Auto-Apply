@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { contains, matchJob, validateCandidate } from '../src/matcher.js';
+import { searchUrl, jobIdentity, firstSearchPageUrl } from '../src/search.js';
+import { applyToJob } from '../src/application.js';
+import { answerFor } from '../src/answers.js';
+const candidate = { roles: ['.NET Developer'], skills: ['C#', '.NET Core'], locations: ['Bangalore'], experienceYears: 4, minimumMatch: 75 };
+const job = { title: 'Senior Dot Net Developer', description: 'C# and .NET Core', location: 'Bengaluru', experience: '3 - 6 years' };
+test('matches dot net aliases, location alias and experience', () => assert.equal(matchJob(job, candidate).eligible, true));
+test('rejects wrong role and location', () => {
+  for (const change of [{ title:'Java Developer' }, { location:'Delhi' }]) assert.equal(matchJob({...job,...change},candidate).eligible,false);
+});
+test('skill matching avoids substring false positives', () => { assert.equal(contains('React Native', 'C'),false);assert.equal(contains('C# developer','C#'),true);assert.equal(contains('ASP.NET Core','ASP.NET Core'),true); });
+test('rejects incomplete candidate profiles', () => { assert.throws(()=>validateCandidate({...candidate,skills:[]})); assert.throws(()=>validateCandidate({...candidate,experienceYears:null})); });
+test('search uses role, location and pagination', () => { const url=new URL(searchUrl('.NET Developer','Hyderabad',2));assert.equal(url.searchParams.get('k'),'.NET Developer');assert.equal(url.searchParams.get('l'),'Hyderabad');assert.match(url.pathname,/-2$/); });
+test('an open paginated search is reset to page one without losing its filters', () => { const url=new URL(firstSearchPageUrl('https://www.naukri.com/full-stack-dot-net-developer-jobs-2?k=.net&jobAge=7&pageNo=2'));assert.equal(url.pathname,'/full-stack-dot-net-developer-jobs');assert.equal(url.searchParams.get('k'),'.net');assert.equal(url.searchParams.get('jobAge'),'7');assert.equal(url.searchParams.has('pageNo'),false); });
+test('identity ignores trackers and rejects external domains', () => { assert.equal(jobIdentity('https://www.naukri.com/job-listings-dotnet-123456789012?x=1'),'123456789012');assert.throws(()=>jobIdentity('https://naukri.com.evil.test/job')); });
+test('preview never touches the browser even for one-click jobs', async () => { const page=new Proxy({}, {get(){throw Error('Browser touched in preview');}});assert.equal((await applyToJob({jobPage:page,autoSubmit:false})).status,'DRY_RUN_MATCH'); });
+test('does not infer current city or technology experience from preferences and total experience', () => { assert.equal(answerFor('Current location',candidate),null);assert.equal(answerFor('Years of experience in Azure',candidate),null);assert.equal(answerFor('Total experience',candidate),'4'); });
+test('answers listed-skill experience but does not claim unlisted technologies', () => { assert.equal(answerFor('How many years of experience do you have in C#/.net core?',candidate),'4');assert.equal(answerFor('How many years of experience do you have in Azure?',candidate),null);assert.equal(answerFor('How many years of experience do you have in ASP.NET MVC?',{...candidate,skills:['ASP.NET Core MVC']}),'4');assert.equal(answerFor('How many years of experience do you have in Java?',{...candidate,skills:['JavaScript']}),null); });
