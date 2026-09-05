@@ -1,1 +1,1 @@
-{"name":"naukri-auto-apply-worker","version":"0.1.0","type":"module","scripts":{"start":"node src/index.js"},"dependencies":{"dotenv":"^16.4.5","playwright":"^1.55.0"}}
+{"name":"naukri-auto-apply-worker","version":"0.2.0","type":"module","scripts":{"start":"node src/index.js","test":"node --test"},"dependencies":{"dotenv":"^16.4.5","playwright":"^1.55.0"}}
