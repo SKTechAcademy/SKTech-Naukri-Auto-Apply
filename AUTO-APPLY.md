@@ -16,8 +16,8 @@ Double-click START-AUTO-APPLY.cmd and open http://127.0.0.1:8788. Keep the termi
 6. Open login and sign into that candidate's own Naukri session. Passwords, OTP and CAPTCHA are entered manually.
 7. Click Verify account. The visible Naukri profile email must exactly match the saved account email.
 8. Use **Auto Apply profile matches** for profile-filtered jobs. Use **Apply open search** to process the jobs already open in this candidate’s Naukri search, without extra score or experience filters. Both use the real saved candidate details. Preview never clicks Apply; live mode can submit one-click applications.
-9. Preview can scan 1–10 pages and always starts from page 1 of the open search, even when a later page is open. Live apply remains capped at two pages per run.
-10. Review Applications for this candidate's results. Unknown questions, account verification failures and unfamiliar application flows stop the run.
+9. Preview and live apply start from page 1 and follow Naukri's Next control until the result set ends. The matching-job limit controls how many eligible jobs are previewed or attempted; skipped and nonmatching jobs do not consume it.
+10. Review Applications for this candidate's results. Unknown questions and unsupported pre-submit flows are recorded and skipped; an uncertain submission, CAPTCHA, or account verification failure stops the run.
 
 ## Candidate separation
 
@@ -43,7 +43,7 @@ Private records live under private/candidates/<candidate-id>/. This directory is
 
 ## Current limits and validation
 
-The worker runs one candidate at a time on this PC. Preview scans up to ten result pages; live apply scans up to two, within a 1–100 job limit. An open paginated search is reset to page 1 before scanning. Profile matching reads full descriptions for otherwise relevant jobs; experience ranges do not reject a job. Freshness is enforced from each job’s posting label in both modes. The chatbot is scoped separately from the background job page, answers known profile questions, and stops on facts that are not saved rather than inventing them. Naukri UI changes may require selector updates; account verification deliberately has no bypass.
+The worker runs one candidate at a time on this PC. It scans result pages until Naukri has no next page, within a 1–100 matching-job limit for preview or application attempts. An open paginated search is reset to page 1 before scanning. Profile matching reads full descriptions for otherwise relevant jobs; experience ranges do not reject a job. Freshness is enforced from each job’s posting label in both modes. Jobs that open an external company application, lack an Apply control, or present an unknown question before submission are recorded and skipped so the next job can proceed. An uncertain submission, CAPTCHA, or account mismatch still stops the run for review. The chatbot is scoped separately from the background job page, answers known profile questions, and stops on facts that are not saved rather than inventing them. Naukri UI changes may require selector updates; account verification deliberately has no bypass.
 
 Tests cover candidate isolation, API locking, editable fields, stale edits, duplicate account binding, browser ownership, resume integrity, account mismatch, open-search behavior and application confirmations. Live verification was checked against Naukri’s email title attribute. A BDO application and an AI/full-stack .NET application were confirmed live for the selected candidate; an existing Infosys Applied badge was recognized from captured evidence. This does not guarantee every employer’s screening form is supported. No recurring schedule or public hosting is installed.
 

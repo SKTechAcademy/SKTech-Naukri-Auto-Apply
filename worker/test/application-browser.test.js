@@ -41,6 +41,10 @@ test('application behavior on isolated browser fixtures', async t => {
     await t.test('leaves security challenges for manual action', async () => {
       assert.equal((await fixture('<p>Enter OTP to continue</p><button>Apply</button>')).status,'MANUAL_REQUIRED');
     });
+    await t.test('classifies company-site applications as a skip', async () => {
+      const result=await fixture('<button>Apply on company site</button>');
+      assert.equal(result.status,'SKIPPED');assert.match(result.reason,/External company/);
+    });
     await t.test('stop prevents initial application click', async () => {
       assert.equal((await fixture('<button>Apply</button>',{stopped:()=>true})).status,'STOPPED');
     });

@@ -112,7 +112,7 @@ $('login').onclick=()=>action(async()=>{await api(`candidates/${selected.id}/log
 $('verify').onclick=()=>action(async()=>{await api(`candidates/${selected.id}/verify`,{});toast('Naukri account email matches this candidate.');await poll();});
 for(const mode of ['preview','apply'])$(mode).onclick=()=>action(async()=>{
   if(dirty)throw Error('Save and review your profile changes first.');
-  await api(`candidates/${selected.id}/run`,{mode,maxJobs:Number($('maxJobs').value),pages:mode==='preview'?Number($('pages').value):undefined,revision:selected.revision});
+  await api(`candidates/${selected.id}/run`,{mode,maxJobs:Number($('maxJobs').value),revision:selected.revision});
   showView('applications');toast(mode==='apply'?`Auto Apply started for ${selected.name}.`:`Preview started for ${selected.name}.`);await poll();
 });
 $('stop').onclick=async()=>{try{await api(`candidates/${selected.id}/stop`,{});await poll();}catch(error){toast(error.message,true);}};

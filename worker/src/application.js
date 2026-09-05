@@ -56,6 +56,8 @@ export async function applyToJob({ jobPage, job, candidate, autoSubmit, artifact
   await jobPage.goto(job.url, { waitUntil: 'domcontentloaded' }); await jobPage.waitForTimeout(1500); let text = await visibleText(jobPage);
   if (applicationConfirmed(text, job) || await hasAppliedBadge(jobPage)) return { status: 'ALREADY_APPLIED' };
   if (security.test(text)) return { status: 'MANUAL_REQUIRED', reason: 'OTP/CAPTCHA detected', evidence: await saveEvidence(jobPage, artifactDir, job, 'security') };
+  const externalApply = jobPage.getByRole('button',{name:/^apply on company site$/i}).or(jobPage.getByRole('link',{name:/^apply on company site$/i})).first();
+  if (await externalApply.isVisible().catch(() => false)) return { status: 'SKIPPED', reason: 'External company application skipped; continuing to next Naukri job' };
   const apply = jobPage.locator(selectors.applyButton).first(); if (!(await apply.isVisible().catch(() => false))) return { status: 'NEEDS_REVIEW', reason: 'Apply button not found', evidence: await saveEvidence(jobPage, artifactDir, job, 'no-apply-button') };
   if (stopped()) return { status: 'STOPPED' };
   await beforeAction();

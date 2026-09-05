@@ -56,3 +56,16 @@ test('open-search preview starts at page one and follows pagination',async()=>{
     assert.equal(new URL(runner.state.searchUrl).pathname,'/dot-net-developer-jobs');
   }finally{await browser.close();assert.ok(path.resolve(dir).startsWith(path.resolve(os.tmpdir())+path.sep));await fs.rm(dir,{recursive:true,force:true});}
 });
+test('live run skips an external-company job and continues to the next Naukri application',async()=>{
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'sktech-continue-'));const browser=await chromium.launch({headless:true});
+  try{
+    const store=new CandidateStore(dir);await store.init();const p=await store.create('Continue fixture');const candidate=await store.save(p.id,{...p,naukriEmail:'fixture@example.test',roles:['.NET Developer'],skills:['C#'],locations:['Bangalore'],experienceYears:4.2,minimumMatch:50,profileConfirmed:true});
+    const context=await browser.newContext();
+    await context.route('**/*',route=>{const url=route.request().url();if(url.includes('job-listings-external-111111111111'))return route.fulfill({contentType:'text/html',body:'<button>Apply on company site</button>'});if(url.includes('job-listings-naukri-222222222222'))return route.fulfill({contentType:'text/html',body:'<button onclick="document.body.innerHTML=\'Successfully applied\'">Apply</button>'});return route.fulfill({contentType:'text/html',body:'<div class="srp-jobtuple-wrapper"><a class="title" href="https://www.naukri.com/job-listings-external-111111111111">External .NET Developer</a><span class="locWdth">Bangalore</span>C# <span>1 day ago</span></div><div class="srp-jobtuple-wrapper"><a class="title" href="https://www.naukri.com/job-listings-naukri-222222222222">Naukri .NET Developer</a><span class="locWdth">Bangalore</span>C# <span>1 day ago</span></div>'});});
+    const page=await context.newPage();await page.goto('https://www.naukri.com/dot-net-developer-jobs');
+    const runner=new Runner({store,launch:async()=>context,accountVerifier:async()=>({email:candidate.naukriEmail,at:new Date().toISOString()})});
+    await runner.run(candidate.id,{source:'current',matchPolicy:'search',mode:'apply',maxJobs:2,pages:1});
+    const byTitle=Object.fromEntries(runner.state.jobs.map(job=>[job.title,job.status]));
+    assert.equal(byTitle['External .NET Developer'],'SKIPPED');assert.equal(byTitle['Naukri .NET Developer'],'APPLIED');assert.match(runner.state.message,/Finished. Scanned 2 jobs and processed 2 matches/);
+  }finally{await browser.close();assert.ok(path.resolve(dir).startsWith(path.resolve(os.tmpdir())+path.sep));await fs.rm(dir,{recursive:true,force:true});}
+});

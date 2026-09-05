@@ -62,11 +62,9 @@ export async function createPortal({ projectRoot = root, runner: suppliedRunner 
           validateCandidate(candidate);
           if (!candidate.profileConfirmed) throw new Error('Review and confirm the candidate details before running.');
           if (!['preview','apply'].includes(body.mode) || !Number.isInteger(body.maxJobs) || body.maxJobs<1 || body.maxJobs>100) throw new Error('Choose preview or apply and 1–100 jobs.');
-          const pages = body.mode === 'preview' ? body.pages : 2;
-          if (!Number.isInteger(pages) || pages<1 || pages>10) throw new Error('Choose 1–10 pages for preview.');
           const source=body.source||'profile',matchPolicy=body.matchPolicy||'profile';
           if(!['profile','current'].includes(source)||!['profile','search'].includes(matchPolicy)||(matchPolicy==='search'&&source!=='current'))throw new Error('Apply search jobs requires an open Naukri search.');
-          runner.completion = runner.run(id,{mode:body.mode,maxJobs:body.maxJobs,pages,source,matchPolicy}).catch(error=>{runner.state.message=error.message;});
+          runner.completion = runner.run(id,{mode:body.mode,maxJobs:body.maxJobs,pages:null,source,matchPolicy}).catch(error=>{runner.state.message=error.message;});
           return send(202,{started:true,candidateId:id});
         }
         return send(404,{error:'Unknown operation.'});

@@ -7,6 +7,15 @@ import { answerFor } from '../src/answers.js';
 const candidate = { roles: ['.NET Developer'], skills: ['C#', '.NET Core'], locations: ['Bangalore'], experienceYears: 4, minimumMatch: 75 };
 const job = { title: 'Senior Dot Net Developer', description: 'C# and .NET Core', location: 'Bengaluru', experience: '3 - 6 years' };
 test('matches dot net aliases, location alias and experience', () => assert.equal(matchJob(job, candidate).eligible, true));
+test('a larger saved skill list does not dilute strong job matches', () => {
+  const result = matchJob(job, {...candidate, skills:['C#','.NET Core','ASP.NET MVC','SQL','Azure','JavaScript','React','Git'], minimumMatch:75});
+  assert.equal(result.score,80);
+  assert.equal(result.eligible,true);
+});
+test('generic developer and engineer titles require two relevant skill hits', () => {
+  assert.equal(matchJob({title:'Fullstack Engineer',description:'C# and .NET Core services',location:'Bangalore'},candidate).eligible,true);
+  assert.equal(matchJob({title:'Fullstack Engineer',description:'C# services',location:'Bangalore'},candidate).eligible,false);
+});
 test('rejects wrong role and location', () => {
   for (const change of [{ title:'Java Developer' }, { location:'Delhi' }]) assert.equal(matchJob({...job,...change},candidate).eligible,false);
 });

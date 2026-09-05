@@ -57,14 +57,13 @@
         <aside class="run-column">
           <section class="run-card"><div class="run-title"><span class="run-symbol">↗</span><div><h3>Ready for the next step?</h3><p>Run for the selected candidate</p></div></div><div class="run-candidate"><span id="runAvatar" class="avatar small">SK</span><div><strong id="runCandidateName"></strong><small id="runEmail"></small></div></div>
             <div class="session-box"><div class="session-heading"><span>NAUKRI SESSION</span><span id="sessionBadge" class="badge neutral">Not verified</span></div><p id="sessionDescription">Open this candidate’s separate browser and sign in.</p><div class="session-buttons"><button id="login" class="button secondary">Open login ↗</button><button id="verify" class="button secondary">Verify account</button></div></div>
-            <label class="limit-label">Jobs to check per run<input id="maxJobs" type="number" min="1" max="100" value="20"></label>
-            <label class="limit-label">Pages to scan in preview<input id="pages" type="number" min="1" max="10" value="10"><small>Preview starts at page 1 even when another search page is open. Live apply remains capped at two pages.</small></label>
+            <label class="limit-label">Matching jobs to process per run<input id="maxJobs" type="number" min="1" max="100" value="20"><small>Scanning starts at page 1 and follows Next until results end. Skipped and nonmatching jobs do not use this limit.</small></label>
             <button id="preview" class="button preview-button">Preview matching jobs <span>→</span></button><button id="apply" class="button primary apply-button">Auto Apply profile matches <span>↗</span></button>
             <button id="applySearch" class="button preview-button">Apply open search <span>↗</span></button><p class="search-help">Applies jobs from this candidate’s open Naukri search, up to your limit, without extra score or experience filters. Your saved freshness limit applies. Answers still use their real details.</p>
             <button id="stop" class="button stop-button" hidden>Stop this run</button>
             <p id="runMessage" class="run-message" aria-live="polite">Save the profile, then verify the Naukri account.</p>
           </section>
-          <div class="protection-card"><div class="eyebrow">CANDIDATE SEPARATION</div><h3>Details stay in their lane.</h3><ul><li>Individual login session</li><li>Candidate-owned resume copy</li><li>Account check before applying</li><li>Profile locked during a run</li></ul><p>Unknown questions or an unreadable account stop the run for review.</p></div>
+          <div class="protection-card"><div class="eyebrow">CANDIDATE SEPARATION</div><h3>Details stay in their lane.</h3><ul><li>Individual login session</li><li>Candidate-owned resume copy</li><li>Account check before applying</li><li>Profile locked during a run</li></ul><p>Unsupported jobs are recorded and skipped. CAPTCHA, account mismatch, or an uncertain submission stops the run for review.</p></div>
         </aside>
       </div>
     </div>

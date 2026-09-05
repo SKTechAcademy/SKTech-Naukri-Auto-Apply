@@ -17,9 +17,13 @@ export function validateCandidate(candidate) {
 export function matchJob(job, candidate) {
   const text = `${job.title} ${job.description}`;
   const skills = candidate.skills.filter(skill => contains(text, skill));
-  const roleHit = candidate.roles.some(role => contains(job.title, role));
+  const exactRoleHit = candidate.roles.some(role => contains(job.title, role));
+  const profileTerms = `${candidate.roles.join(' ')} ${candidate.skills.join(' ')}`;
+  const namedTechnologies = ['dotnet','java','python','php','ruby','golang','android','ios','flutter','salesforce','sap','mainframe','devops'];
+  const conflictingTitleTechnology = namedTechnologies.some(technology => contains(job.title, technology) && !contains(profileTerms, technology));
+  const roleHit = exactRoleHit || (/\b(?:developer|engineer)\b/i.test(job.title) && skills.length >= 2 && !conflictingTitleTechnology);
   const locationHit = candidate.locations.some(location => contains(job.location, location));
-  const score = Math.round(skills.length / candidate.skills.length * 60 + (roleHit ? 25 : 0) + (locationHit ? 15 : 0));
+  const score = Math.round(Math.min(skills.length / 3, 1) * 60 + (roleHit ? 25 : 0) + (locationHit ? 15 : 0));
   const reason = !roleHit ? 'Role does not match' : !locationHit ? 'Location does not match' : score < candidate.minimumMatch ? 'Below minimum match' : '';
   return { score, skills, eligible: !reason, reason };
 }

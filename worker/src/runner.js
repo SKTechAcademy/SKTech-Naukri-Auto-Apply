@@ -63,11 +63,11 @@ export class Runner {
     return this.verified;
   }
   stop() { this.stopRequested = true; this.state.message = 'Stopping after the current browser action…'; }
-  async run(candidateId, { mode = 'preview', maxJobs = 20, pages = 2, source = 'profile', matchPolicy = 'profile' } = {}) {
+  async run(candidateId, { mode = 'preview', maxJobs = 20, pages = null, source = 'profile', matchPolicy = 'profile' } = {}) {
     if (this.state.running) throw new Error('A run is already active.');
     if (!['preview', 'apply'].includes(mode)) throw new Error('Invalid run mode.');
     if(!['profile','current'].includes(source)||!['profile','search'].includes(matchPolicy)||(matchPolicy==='search'&&source!=='current'))throw new Error('Apply search jobs requires an open Naukri search.');
-    if (!Number.isInteger(maxJobs) || maxJobs < 1 || maxJobs > 100 || !Number.isInteger(pages) || pages < 1 || pages > 10) throw new Error('Use 1–100 jobs and 1–10 search pages.');
+    if (!Number.isInteger(maxJobs) || maxJobs < 1 || maxJobs > 100 || (pages !== null && (!Number.isInteger(pages) || pages < 1))) throw new Error('Use 1–100 matching jobs.');
     this.stopRequested = false;
     this.store.paths(candidateId);
     this.state = { running: true, candidateId, message: 'Checking candidate account…', jobs: [], mode, source, matchPolicy };
@@ -107,10 +107,10 @@ export class Runner {
       const history = await loadHistory(historyFile);
       const accountHistory = () => history.filter(item => !item.accountEmail || item.accountEmail.toLowerCase() === candidate.naukriEmail.toLowerCase());
       const seen = new Set();
-      let checked = 0;
+      let scanned = 0, matched = 0;
       const searchPlans=source==='current'?[{role:'open Naukri search',location:''}]:candidate.roles.flatMap(role=>candidate.locations.map(location=>({role,location})));
-      search: for (const {role,location} of searchPlans) for (let n = 1; n <= pages; n++) {
-        if (this.stopRequested || checked >= maxJobs) break search;
+      search: for (const {role,location} of searchPlans) for (let n = 1; pages === null || n <= pages; n++) {
+        if (this.stopRequested || matched >= maxJobs) break search;
         this.state.message = `Searching ${role} in ${location}, page ${n}`;
         if(source==='profile')await page.goto(searchUrl(role, location, n), { waitUntil: 'domcontentloaded' });
         else if(n===1)await page.goto(currentSearchStart,{waitUntil:'domcontentloaded'});
@@ -121,7 +121,7 @@ export class Runner {
         }
         const cards = page.locator(selectors.jobCard);
         await cards.first().waitFor({ state: 'visible', timeout: 12000 }).catch(() => {});
-        if (!await cards.count()) { this.state.message = 'No job cards found. Check the browser for login or a changed Naukri layout.'; return; }
+        if (!await cards.count()) break;
         const extracted = await cards.evaluateAll((elements, s) => elements.map(card => {
           const link=card.querySelector('a.title, a[href*="job-listings"]');
           return { url:link?.href,title:card.querySelector(s.jobTitle)?.textContent?.trim()||'',location:card.querySelector(s.location)?.textContent?.trim()||'',experience:card.querySelector(s.experience)?.textContent?.trim()||'',description:card.innerText };
@@ -136,9 +136,10 @@ export class Runner {
           job.postedText = postingLabel(job.description);
           jobs.push(job);
         }
+        if (!jobs.length) break;
         for (let job of jobs) {
-          if (this.stopRequested || checked >= maxJobs) break search;
-          checked++;
+          if (this.stopRequested) break search;
+          scanned++;
           let result, pending;
           let freshness = checkFreshness(job, candidate.freshnessDays);
           const duplicate = shouldSkip(accountHistory(), job.url);
@@ -156,15 +157,19 @@ export class Runner {
           if (shouldSkip(accountHistory(), job.url)) result = { status: 'SKIPPED', reason: 'Previously applied or submission needs reconciliation' };
           else if (!freshness.eligible) result = { status: 'SKIPPED', reason: freshness.reason };
           else if (matchPolicy==='profile' && !match.eligible) result = { status: 'SKIPPED', reason: match.reason };
-          else if (mode === 'preview') result = { status: 'DRY_RUN_MATCH' };
+          else if (matched >= maxJobs) break search;
+          else if (mode === 'preview') { matched++; result = { status: 'DRY_RUN_MATCH' }; }
           else {
+            matched++;
             this.state.message = `Applying: ${job.title}`;
             const jobPage = await context.newPage();
             pending = { ...job, candidateId, candidateName: candidate.name, accountEmail: candidate.naukriEmail, profileRevision: candidate.revision, score: match.score, status: 'SUBMITTING', at: new Date().toISOString() };
             history.push(pending); await saveHistory(historyFile, history);
             result = await applyToJob({ jobPage, job, candidate, autoSubmit: true, artifactDir: files.artifacts, stopped: () => this.stopRequested, beforeAction: guard }).catch(error => ({ status: 'SUBMISSION_UNCONFIRMED', reason: error.message }));
-            if (['APPLIED', 'ALREADY_APPLIED'].includes(result.status)) await jobPage.close();
-            else this.stopRequested = true;
+            if (['APPLIED', 'ALREADY_APPLIED', 'NEEDS_REVIEW', 'SKIPPED'].includes(result.status)) {
+              await jobPage.close();
+              if (['NEEDS_REVIEW', 'SKIPPED'].includes(result.status)) this.state.message = `${result.reason}. Continuing to next job…`;
+            } else this.stopRequested = true;
           }
           const record = { ...job, postedAgeDays: freshness.postedAgeDays, freshnessDays: freshness.freshnessDays, candidateId, candidateName: candidate.name, accountEmail: candidate.naukriEmail, profileRevision: candidate.revision, score: match.score, source, matchPolicy, ...result, at: new Date().toISOString() };
           if (pending) Object.assign(pending, record); else history.push(record); await saveHistory(historyFile, history);
@@ -172,7 +177,7 @@ export class Runner {
           if (this.stopRequested) { this.state.message = result.reason || 'Stopped. Review the browser before restarting.'; return; }
         }
       }
-      this.state.message = this.stopRequested ? 'Stopped.' : `Finished. Checked ${checked} jobs.`;
+      this.state.message = this.stopRequested ? 'Stopped.' : `Finished. Scanned ${scanned} jobs and processed ${matched} matches.`;
     } catch (error) { this.state.message = `Error: ${error.message}`; }
     finally { this.state.running = false; }
   }
