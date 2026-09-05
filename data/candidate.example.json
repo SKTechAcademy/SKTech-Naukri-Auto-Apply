@@ -1,0 +1,11 @@
+{
+  "name": "Candidate 01",
+  "roles": [".NET Developer", ".NET Full Stack Developer", "Software Engineer"],
+  "skills": ["C#", ".NET Core", "ASP.NET Core", "Web API", "Angular", "React", "SQL Server", "Azure"],
+  "locations": ["Bangalore", "Bengaluru", "Hyderabad", "Remote"],
+  "experienceYears": 4,
+  "currentCTC": "",
+  "expectedCTC": "",
+  "noticePeriod": "",
+  "minimumMatch": 75
+}
