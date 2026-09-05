@@ -1,0 +1,1 @@
+{"name":"naukri-auto-apply-poc","private":true,"scripts":{"install:all":"npm --prefix worker install","worker":"npm --prefix worker start"}}
